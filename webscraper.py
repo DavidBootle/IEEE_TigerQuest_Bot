@@ -124,3 +124,96 @@ def fetch_prospective_members() -> list[dict[str, str]]:
     get_member_info_for_page()
     driver.close()
     return member_info
+
+def get_member_page_id(driver: webdriver.Chrome, name: str):
+    '''
+    Returns the id of the member's page on the TigerQuest page.
+    '''
+    # find the checkbox with the correct id and extract it
+    try:
+        id = driver.find_element(By.CSS_SELECTOR, f"input[title='{name}']").get_attribute('value')
+        return id
+    except NoSuchElementException:
+        return None
+
+def accept_member(driver: webdriver.Chrome, member: dict[str, str]):
+    '''
+    Accepts a member by clicking the reject button on the TigerQuest page.
+    Does not load the tigerQuest page.
+    '''
+    load_prospective_member_page(driver)
+
+    def attempt_to_accept():
+        # find the id for the specific member
+        id = get_member_page_id(driver, member['name'])
+        if id is None:
+            # the id is not found on this page, go to the next page
+            try:
+                next_button = driver.find_element(By.XPATH, "//span[@class='paginationRight']//a[text()='next']")
+                # if this didn't fail, then the next button is present, click it and call the function again
+                driver.get(next_button.get_attribute('href'))
+                attempt_to_accept()
+                return
+            except NoSuchElementException:
+                # if the next button is not present, then we're done
+                print(f'Failed to find member {member["name"]} on TigerQuest to accept.')
+                return
+            
+        # if the id is found
+        else:
+            # run javascript to accept the user
+            driver.execute_script(f"ApproveMember('https://clemson.campuslabs.com/engage/actioncenter/organization/ieee_sbinactive/roster/roster/approvemember/{id}');")
+    
+    attempt_to_accept()
+
+def accept_members(members: list[dict[str, str]]):
+    '''
+    accepts a list of members by clicking the accept button on the TigerQuest page.
+    '''
+    driver = initialize_driver()
+
+    for member in members:
+        accept_member(driver, member)
+    
+    driver.close()
+
+def reject_member(driver: webdriver.Chrome, member: dict[str, str]):
+    '''
+    Rejects a member by clicking the reject button on the TigerQuest page.
+    Does not load the tigerQuest page.
+    '''
+    load_prospective_member_page(driver)
+
+    def attempt_to_remove():
+        # find the id for the specific member
+        id = get_member_page_id(driver, member['name'])
+        if id is None:
+            # the id is not found on this page, go to the next page
+            try:
+                next_button = driver.find_element(By.XPATH, "//span[@class='paginationRight']//a[text()='next']")
+                # if this didn't fail, then the next button is present, click it and call the function again
+                driver.get(next_button.get_attribute('href'))
+                attempt_to_remove()
+                return
+            except NoSuchElementException:
+                # if the next button is not present, then we're done
+                print(f'Failed to find member {member["name"]} on TigerQuest to remove.')
+                return
+            
+        # if the id is found
+        else:
+            # run javascript to reject the user
+            driver.execute_script(f"DenyMember('https://clemson.campuslabs.com/engage/actioncenter/organization/ieee_sbinactive/roster/roster/denymember/{id}');")
+    
+    attempt_to_remove()
+
+def reject_members(members: list[dict[str, str]]):
+    '''
+    Rejects a list of members by clicking the reject button on the TigerQuest page.
+    '''
+    driver = initialize_driver()
+
+    for member in members:
+        reject_member(driver, member)
+    
+    driver.close()
