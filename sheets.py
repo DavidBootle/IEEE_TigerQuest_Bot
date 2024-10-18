@@ -85,5 +85,25 @@ def update_member_status(member: dict[str, str], new_status: str):
     worksheet.update_cell(member_row, 4, new_status)
     worksheet.update_cell(member_row, 5, current_date)
 
+def member_approved(member: dict[str, str], member_id: str):
+    '''
+    Updates the status of the member to 'APPROVED' and adds their membership ID to the members sheet.
+
+    Member should be a dictionary with the attributes 'name', 'email'. member_id should be a string.
+    '''
+    # connect to google sheets and get the worksheet
+    worksheet = get_worksheet()
+
+    # get the current date
+    current_date = datetime.now().strftime('%m/%d/%Y')
+
+    # update the status of the member in the sheet
+    cell = worksheet.find(member['email'])
+    member_row = cell.row
+    worksheet.update_cell(member_row, 3, member_id)
+    worksheet.update_cell(member_row, 4, 'APPROVED')
+    worksheet.update_cell(member_row, 5, current_date)
+
 # add_prospective_member_to_sheet({'name': 'David Bootle', 'email': 'dbootle@clemson.edu'})
 # update_member_status({'name': 'David Bootle', 'email': 'dbootle@clemson.edu'}, 'REMINDER SENT')
+member_approved({'name': 'David Bootle', 'email': 'dbootle@clemson.edu'}, '123456789')
