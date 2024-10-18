@@ -52,3 +52,25 @@ def send_interest_email(member: dict[str, str]):
     }
 
     gmail.send_message(**params)
+
+def send_reminder_email(member: dict[str, str]):
+    '''
+    Sends a reminder email to a member.
+    '''
+    # load interest form
+    email_html = get_email('reminder')
+    email_html = format_email(email_html, member)
+
+    # send email to user
+    gmail = get_gmail()
+    params = {
+        'to': member['email'],
+        'sender': 'ieeesb@g.clemson.edu',
+        'subject': 'Clemson IEEE: Please Complete Registration Within One Week',
+        'msg_html': email_html,
+        'signature': True,
+    }
+
+    gmail.send_message(**params)
+
+send_reminder_email({'name': 'David Bootle', 'email': 'dbootle@g.clemson.edu'})
