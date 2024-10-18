@@ -52,5 +52,3 @@ def send_interest_email(member: dict[str, str]):
     }
 
     gmail.send_message(**params)
-
-send_interest_email({'name': 'David Bootle', 'email': 'dbootle@clemson.edu'})
