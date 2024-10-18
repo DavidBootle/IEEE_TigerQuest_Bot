@@ -6,6 +6,7 @@ removing them, or fetching information about a specific member.
 The sheet in question should be the current year's IEEE Membership sheet.
 '''
 
+from datetime import datetime
 import tomllib
 import gspread
 
@@ -49,3 +50,19 @@ def get_list_of_known_members() -> list[dict[str, str]]:
             'status_date': status_dates
         })
     return member_info
+
+def add_prospective_member_to_sheet(member: dict[str, str]):
+    '''
+    Takes a new prospective member and adds them to the current year's IEEE membership sheet.
+
+    The member should be a dictionary with the attributes 'name', 'email'. The member
+    will be given the status 'EMAIL SENT' with the current date.
+    '''
+    # connect to google sheets and get the worksheet
+    worksheet = get_worksheet()
+
+    # get the current date
+    current_date = datetime.now().strftime('%m/%d/%Y')
+
+    # add the new member to the sheet
+    print(worksheet.append_row([member['name'], member['email'], '', 'EMAIL SENT', current_date], table_range='A1:E1'))
