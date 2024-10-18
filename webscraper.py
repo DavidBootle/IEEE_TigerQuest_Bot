@@ -11,6 +11,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import tomllib
+from selenium.common.exceptions import NoSuchElementException
 
 PROSPECTIVE_MEMBER_URL = 'https://clemson.campuslabs.com/engage/actioncenter/organization/ieee_sbinactive/roster/Roster/prospective'
 LOGIN_DOMAIN = 'idpfed.clemson.edu'
@@ -64,4 +65,62 @@ def load_prospective_member_page(driver: webdriver.Chrome):
     # login if necessary
     clemson_login(driver)
 
+def fetch_prospective_members() -> list[dict[str, str]]:
+    '''
+    Opens the TigerQuest page and returns a list of the prospective members.
+    The returned object is a list of dictionaries, where each dictionary contains
+    the attributes 'name' and 'email'.
+    '''
     
+    driver = initialize_driver() # Create a new webdriver
+    load_prospective_member_page(driver) # open TigerQuest page
+
+    # get a list of all the member-modal class elements that are links, as they contain the names of the users
+
+    member_info = []
+
+    def get_member_info_for_page():
+        # find all elements identified by a.member-modal
+        name_elements = driver.find_elements(By.XPATH, "//table//a[contains(@class, 'member-modal')]")
+
+        # extract the href attributes from each element
+        name_element_hrefs = [element.get_attribute('href') for element in name_elements]
+
+        # for each url, open in a new tab and extract the name and email, then save to member info
+        for url in name_element_hrefs:
+            # open a new tab with javascript
+            driver.execute_script("window.open('');")
+
+            # switch to the new tab
+            driver.switch_to.window(driver.window_handles[-1])
+
+            # navigate to the new URL in the new tab
+            driver.get(url)
+
+            # get the name and email from the new tab
+            name = driver.find_element(By.CSS_SELECTOR, 'span.fn').text
+            email = driver.find_element(By.CSS_SELECTOR, 'a.email').get_attribute('href')[7:]
+            member_info.append({
+                'name': name,
+                'email': email
+            })
+
+            # close the current tab
+            driver.close()
+
+            # switch back to original tab
+            driver.switch_to.window(driver.window_handles[0])
+        
+        # check to see if the next button is present, and if so, click it and call the function again
+        try:
+            next_button = driver.find_element(By.XPATH, "//span[@class='paginationRight']//a[text()='next']")
+            # if this didn't fail, then the next button is present, click it and call the function again
+            driver.get(next_button.get_attribute('href'))
+            get_member_info_for_page()
+        except NoSuchElementException:
+            # if the next button is not present, then we're done
+            return
+    
+    get_member_info_for_page()
+    driver.close()
+    return member_info
