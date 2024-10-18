@@ -72,5 +72,3 @@ def send_reminder_email(member: dict[str, str]):
     }
 
     gmail.send_message(**params)
-
-send_reminder_email({'name': 'David Bootle', 'email': 'dbootle@g.clemson.edu'})
