@@ -18,6 +18,7 @@ import webscraper
 import sheets
 import gmail
 from datetime import datetime
+import time
 
 def perform_update():
     '''
@@ -32,8 +33,11 @@ def perform_update():
     # make a list of members that are in the tq page but not in the sheet
     tq_emails = [member['email'] for member in tq_members]
     sheet_emails = [member['email'] for member in sheet_members]
-    pending_members = list(set(tq_emails) - set(sheet_emails))
-
+    pending_members = []
+    for member in tq_members:
+        if member['email'] not in sheet_emails:
+            pending_members.append(member)
+        
     '''NEW MEMBERS'''
     # send those members the interest email, then add them to the sheet
     for member in pending_members:
@@ -42,25 +46,35 @@ def perform_update():
     
     '''CHECK FOR MEMBER RESPONSES IN THE EMAIL'''
     # for each member in tigerquest, check to see if they have emailed their membership status
+    accepted_members = []
     for member in sheet_members:
         # if the member is on the tq page, see if they have emailed their membership status
         if member['email'] in tq_emails:
             id = gmail.get_membership_id_from_email(member)
             if id is not None:
                 # if they have emailed their membership status, update their status in the sheet and accept them in tigerquest and email them the welcome message
-                webscraper.accept_member(member)
+                accepted_members.append(member)
                 sheets.member_approved(member, id)
                 gmail.send_welcome_email(member)
-    
-    # refresh member list
-    tq_members = webscraper.fetch_prospective_members() # fetch the list of prospective members
-    sheet_members = sheets.get_list_of_known_members() # check the google sheet and see if any of the prospective members are not already in it
+                # remove from tq list
+                for tq_member in tq_members:
+                    if tq_member['email'] == member['email']:
+                        tq_members.remove(tq_member)
+    webscraper.accept_members(accepted_members)
+
+    # recalculate tq emails from modified tq members list
+    tq_emails = [member['email'] for member in tq_members] 
+
+    # only refresh the sheet if there are pending members or accepted members
+    # if there are not pending members or accepted members, the sheet is already up to date
+    if (len(pending_members) + len(accepted_members)) != 0:
+        sheet_members = sheets.get_list_of_known_members()
     
     '''SEND REMINDERS'''
     # get a list of members that are in the sheet, but have a status of 'EMAIL SENT' and a status date more than a week ago
     for member in sheet_members:
         # if the member was sent an email more than a week ago, send a reminder email and change their status to 'REMINDER SENT'
-        if member['status'] == 'EMAIL SENT' and (datetime.now() - datetime.strptime(member['status_date'], '%m/%d/%Y')).days > 7:
+        if member['status'] == 'EMAIL SENT' and (datetime.now() - datetime.strptime(member['status_date'], '%m/%d/%y')).days > 7:
             gmail.send_reminder_email(member)
             sheets.update_member_status(member, 'REMINDER SENT')
 
@@ -75,7 +89,7 @@ def perform_update():
     members_to_remove_from_tq = []
     for member in sheet_members:
         # if the member was sent a reminder more than a week ago
-        if member['status'] == 'REMINDER SENT' and (datetime.now() - datetime.strptime(member['status_date'], '%m/%d/%Y')).days > 7:
+        if member['status'] == 'REMINDER SENT' and (datetime.now() - datetime.strptime(member['status_date'], '%m/%d/%y')).days > 7:
             # if the member is on the tq page, reject them and remove them from the sheet
             if member['email'] in tq_emails:
                 members_to_remove_from_tq.append(member)
@@ -83,4 +97,10 @@ def perform_update():
             sheets.remove_member(member)
     webscraper.reject_members(members_to_remove_from_tq)
 
-perform_update()
+while True:
+    try:
+        perform_update()
+        print('Loop done, sleeping for 10 minutes...')
+    except Exception as e:
+        print(f'Error: {e}')
+    time.sleep(10*60) # sleep for 10 minutes

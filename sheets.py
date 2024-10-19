@@ -64,7 +64,7 @@ def add_prospective_member_to_sheet(member: dict[str, str]):
     worksheet = get_worksheet()
 
     # get the current date
-    current_date = datetime.now().strftime('%m/%d/%Y')
+    current_date = datetime.now().strftime('%m/%d/%y')
 
     # add the new member to the sheet
     worksheet.append_row([member['name'], member['email'], '', 'EMAIL SENT', current_date], table_range='A1:E1')
@@ -81,7 +81,7 @@ def update_member_status(member: dict[str, str], new_status: str):
     worksheet = get_worksheet()
 
     # get the current date
-    current_date = datetime.now().strftime('%m/%d/%Y')
+    current_date = datetime.now().strftime('%m/%d/%y')
 
     # update the status of the member in the sheet
     cell = worksheet.find(member['email'])
@@ -101,7 +101,7 @@ def member_approved(member: dict[str, str], member_id: str):
     worksheet = get_worksheet()
 
     # get the current date
-    current_date = datetime.now().strftime('%m/%d/%Y')
+    current_date = datetime.now().strftime('%m/%d/%y')
 
     # update the status of the member in the sheet
     cell = worksheet.find(member['email'])
