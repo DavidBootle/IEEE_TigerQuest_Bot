@@ -102,6 +102,28 @@ def send_welcome_email(member: dict[str, str]):
 
     print(f'Welcome email sent to {member["name"]}')
 
+def send_rejection_email(member: dict[str, str]):
+    '''
+    Sends a welcome email to a member.
+    '''
+    # load interest form
+    email_html = get_email('rejection')
+    email_html = format_email(email_html, member)
+
+    # send email to user
+    gmail = get_gmail()
+    params = {
+        'to': member['email'],
+        'sender': 'ieeesb@g.clemson.edu',
+        'subject': 'Clemson IEEE Student Branch: Your application has been rejected due to lack of information',
+        'msg_html': email_html,
+        'signature': True,
+    }
+
+    gmail.send_message(**params)
+
+    print(f'Rejection email sent to {member["name"]}')
+
 def swap_email_ending(email):
     '''
     If email ends in @clemson.edu, returns the email ending with @g.clemson.edu.
@@ -149,4 +171,4 @@ def get_membership_id_from_email(member: dict[str, str]) -> str:
     return None
 
 # print(get_membership_id_from_email({'name': 'Ignacio Carmichael', 'email': 'ignacic@clemson.edu'}))
-# send_welcome_email({'name': 'David Bootle', 'email': 'dbootle@clemson.edu'})
+# send_rejection_email({'name': 'David Bootle', 'email': 'dbootle@clemson.edu'})

@@ -60,7 +60,8 @@ def perform_update():
                 for tq_member in tq_members:
                     if tq_member['email'] == member['email']:
                         tq_members.remove(tq_member)
-    webscraper.accept_members(accepted_members)
+    if len(accepted_members) > 0:
+        webscraper.accept_members(accepted_members)
 
     # recalculate tq emails from modified tq members list
     tq_emails = [member['email'] for member in tq_members] 
@@ -93,9 +94,11 @@ def perform_update():
             # if the member is on the tq page, reject them and remove them from the sheet
             if member['email'] in tq_emails:
                 members_to_remove_from_tq.append(member)
-            # remove them from the sheet
-            sheets.remove_member(member)
-    webscraper.reject_members(members_to_remove_from_tq)
+            
+            sheets.remove_member(member) # remove them from the sheet
+            gmail.send_rejection_email(member) # send them a rejection email
+    if len(members_to_remove_from_tq) > 0:
+        webscraper.reject_members(members_to_remove_from_tq)
 
 while True:
     try:
