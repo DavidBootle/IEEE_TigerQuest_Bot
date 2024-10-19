@@ -56,6 +56,8 @@ def send_interest_email(member: dict[str, str]):
 
     gmail.send_message(**params)
 
+    print(f'Interest email sent to {member["name"]}')
+
 def send_reminder_email(member: dict[str, str]):
     '''
     Sends a reminder email to a member.
@@ -76,6 +78,8 @@ def send_reminder_email(member: dict[str, str]):
 
     gmail.send_message(**params)
 
+    print(f'Reminder email sent to {member["name"]}')
+
 def send_welcome_email(member: dict[str, str]):
     '''
     Sends a welcome email to a member.
@@ -95,6 +99,8 @@ def send_welcome_email(member: dict[str, str]):
     }
 
     gmail.send_message(**params)
+
+    print(f'Welcome email sent to {member["name"]}')
 
 def swap_email_ending(email):
     '''

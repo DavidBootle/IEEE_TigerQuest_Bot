@@ -72,6 +72,7 @@ def fetch_prospective_members() -> list[dict[str, str]]:
     the attributes 'name' and 'email'.
     '''
     
+    print('Fetching prospective members...')
     driver = initialize_driver() # Create a new webdriver
     load_prospective_member_page(driver) # open TigerQuest page
 
@@ -141,6 +142,7 @@ def accept_member(driver: webdriver.Chrome, member: dict[str, str]):
     Accepts a member by clicking the reject button on the TigerQuest page.
     Does not load the tigerQuest page.
     '''
+    print(f'Accepting member {member["name"]}...')
     load_prospective_member_page(driver)
 
     def attempt_to_accept():
@@ -182,6 +184,7 @@ def reject_member(driver: webdriver.Chrome, member: dict[str, str]):
     Rejects a member by clicking the reject button on the TigerQuest page.
     Does not load the tigerQuest page.
     '''
+    print(f'Rejecting member {member["name"]}...')
     load_prospective_member_page(driver)
 
     def attempt_to_remove():
