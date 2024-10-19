@@ -5,6 +5,9 @@ membership status updates.
 '''
 
 from simplegmail import Gmail
+from simplegmail.query import construct_query
+import re
+
 import tomllib
 
 def get_gmail() -> Gmail:
@@ -72,3 +75,72 @@ def send_reminder_email(member: dict[str, str]):
     }
 
     gmail.send_message(**params)
+
+def send_welcome_email(member: dict[str, str]):
+    '''
+    Sends a welcome email to a member.
+    '''
+    # load interest form
+    email_html = get_email('welcome')
+    email_html = format_email(email_html, member)
+
+    # send email to user
+    gmail = get_gmail()
+    params = {
+        'to': member['email'],
+        'sender': 'ieeesb@g.clemson.edu',
+        'subject': 'Welcome to IEEE!',
+        'msg_html': email_html,
+        'signature': True,
+    }
+
+    gmail.send_message(**params)
+
+def swap_email_ending(email):
+    '''
+    If email ends in @clemson.edu, returns the email ending with @g.clemson.edu.
+    If email ends in @g.clemson.edu, returns the email ending with @clemson.edu.
+    '''
+    if email.endswith("@clemson.edu"):
+        return email.replace("@clemson.edu", "@g.clemson.edu")
+    elif email.endswith("@g.clemson.edu"):
+        return email.replace("@g.clemson.edu", "@clemson.edu")
+    else:
+        return "Invalid email domain. Must be @clemson.edu or @g.clemson.edu."
+
+def find_membership_number(email: str) -> str:
+    '''
+    Attempts to find a membership number in the email. Returns the membership number if found, otherwise returns None.
+    '''
+    # Regex pattern to match 9 or 10 digit numbers surrounded by spaces or punctuation
+    pattern = r'(?<!\d)[\s.,!?;:"\'(){}\[\]-]*(\d{9,10})(?=[\s.,!?;:"\'(){}\[\]-])'
+    
+    # Search for the first match
+    match = re.search(pattern, email)
+    
+    # Return the matched number if found, otherwise return None
+    if match:
+        return match.group(1)
+    return None
+
+def get_membership_id_from_email(member: dict[str, str]) -> str:
+    '''
+    Takes a member and returns their membership ID from the email.
+    '''
+    query = construct_query({
+        'sender': [member['email'], swap_email_ending(member['email'])],
+    })
+
+    gmail = get_gmail()
+    messages = gmail.get_messages(query=query)
+
+    # search all emails for the membership number
+    # if the membership number is found, return it
+    # if not, return None
+    for message in messages:
+        if find_membership_number(message.plain):
+            return find_membership_number(message.plain)
+    return None
+
+# print(get_membership_id_from_email({'name': 'Ignacio Carmichael', 'email': 'ignacic@clemson.edu'}))
+# send_welcome_email({'name': 'David Bootle', 'email': 'dbootle@clemson.edu'})
