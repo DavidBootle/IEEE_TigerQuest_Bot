@@ -22,6 +22,6 @@ spreadsheet_id = 'spreadsheet id'
 president_name = 'president name'
 ```
 
-4. Download your credentials as a .json file from the Google API Console and save them to a file called `credentials.json` in the project folder.
+4. Download your credentials as a .json file from the Google API Console and save them to a file called `credentials.json` in the project folder. You must sign into the Google API Console as ieeesb@g.clemson.edu. You should see a project called IEEE Registration Bot. Go to the [credentials page](https://console.cloud.google.com/apis/credentials) and click the download button for the OAuth 2.0 Client IDs.
 
 5. When you run the script for the first time, it will ask you to authorize it using your Google account. Always authorize it with the ieeesb@g.clemson.edu account. DO NOT use your personal account, as that will break it. If authentication is failing, delete the `token.json` file in the current directory and try again.
