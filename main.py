@@ -88,10 +88,10 @@ def perform_update():
 
     '''REMOVE MEMBERS WHO HAVE CANCELLED THEIR MEMBERSHIP'''
     # Find members who are not on the tq page, but do not have a status of 'APPROVED'. If they cancelled their own membership, they should be be marked as a cancelled member
-    logger.info('Checking for members that removed their application...')
-    cancelled_members = [member for member in sheet_members if member['email'] not in tq_emails and member['status'] != 'APPROVED']
-    for member in cancelled_members:
-        sheets.update_member_status(member, 'SELF-CANCEL')
+    # logger.info('Checking for members that removed their application...')
+    # cancelled_members = [member for member in sheet_members if member['email'] not in tq_emails and member['status'] != 'APPROVED']
+    # for member in cancelled_members:
+    #     sheets.update_member_status(member, 'SELF-CANCEL')
     
     '''REJECT MEMBERS WHO HAVE NOT RESPONDED WITHIN THE TIME LIMIT'''
     # get a list of members that are in the sheet and on the tq page, but have a status of 'REMINDER SENT' and a status date more than a week ago
