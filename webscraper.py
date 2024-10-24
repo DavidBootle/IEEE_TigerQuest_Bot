@@ -67,6 +67,10 @@ def load_prospective_member_page(driver: webdriver.Chrome):
     # login if necessary
     clemson_login(driver)
 
+    # wait for the member grid to load
+    WebDriverWait(driver, 60).until(EC.presence_of_all_elements_located((By.CLASS_NAME, 'svgGrid')))
+    sleep(1) # wait one second just to be sure
+
 def fetch_prospective_members() -> list[dict[str, str]]:
     '''
     Opens the TigerQuest page and returns a list of the prospective members.
@@ -83,9 +87,8 @@ def fetch_prospective_members() -> list[dict[str, str]]:
     member_info = []
 
     def get_member_info_for_page():
-        # wait for the member grid to load
+        # double check the member grid exists
         WebDriverWait(driver, 60).until(EC.presence_of_all_elements_located((By.CLASS_NAME, 'svgGrid')))
-        sleep(1) # wait one second just to be sure
 
         # find all elements identified by a.member-modal
         name_elements = driver.find_elements(By.XPATH, "//table//a[contains(@class, 'member-modal')]")
