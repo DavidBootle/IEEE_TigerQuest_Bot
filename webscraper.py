@@ -24,7 +24,7 @@ def initialize_driver() -> webdriver.Chrome:
     Returns a webdriver object for the TigerQuest prospective member page.
     AKA Opens a new chrome browser.
     '''
-    service = webdriver.ChromeService(executable_path=None)
+    service = webdriver.ChromeService(executable_path='/usr/bin/chromedriver')
     driver = webdriver.Chrome(service=service)
     return driver
 
@@ -57,6 +57,7 @@ def clemson_login(driver: webdriver.Chrome):
         # type the username and password into the login form
         driver.find_element(By.ID, 'username').send_keys(username)
         driver.find_element(By.ID, 'password').send_keys(password)
+        sleep(2) # sleep for 2 seconds
         driver.find_element(By.ID, 'submitButton').click()
 
 def load_prospective_member_page(driver: webdriver.Chrome):
