@@ -12,18 +12,10 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import tomllib
 from selenium.common.exceptions import NoSuchElementException
+from time import sleep
 
 PROSPECTIVE_MEMBER_URL = 'https://clemson.campuslabs.com/engage/actioncenter/organization/ieee_sbinactive/roster/Roster/prospective'
 LOGIN_DOMAIN = 'idpfed.clemson.edu'
-
-def selenium_test():
-    '''
-    Tests the selenium driver by opening the TigerQuest prospective member page.
-    '''
-    driver = webdriver.Chrome()
-    driver.get(PROSPECTIVE_MEMBER_URL)
-    input("Press Enter to continue...")
-    driver.close()
 
 '''UTILITY FUNCTIONS'''
 def initialize_driver() -> webdriver.Chrome:
@@ -31,8 +23,18 @@ def initialize_driver() -> webdriver.Chrome:
     Returns a webdriver object for the TigerQuest prospective member page.
     AKA Opens a new chrome browser.
     '''
-    driver = webdriver.Chrome()
+    service = webdriver.ChromeService(executable_path=None)
+    driver = webdriver.Chrome(service=service)
     return driver
+
+def selenium_test():
+    '''
+    Tests the selenium driver by opening the TigerQuest prospective member page.
+    '''
+    driver = initialize_driver()
+    driver.get(PROSPECTIVE_MEMBER_URL)
+    input("Press Enter to continue...")
+    driver.close()
 
 def page_has_loaded(driver):
     '''
@@ -81,6 +83,10 @@ def fetch_prospective_members() -> list[dict[str, str]]:
     member_info = []
 
     def get_member_info_for_page():
+        # wait for the member grid to load
+        WebDriverWait(driver, 60).until(EC.presence_of_all_elements_located((By.CLASS_NAME, 'svgGrid')))
+        sleep(1) # wait one second just to be sure
+
         # find all elements identified by a.member-modal
         name_elements = driver.find_elements(By.XPATH, "//table//a[contains(@class, 'member-modal')]")
 
@@ -97,6 +103,9 @@ def fetch_prospective_members() -> list[dict[str, str]]:
 
             # navigate to the new URL in the new tab
             driver.get(url)
+
+            # wait for the page to load
+            WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CLASS_NAME, 'userCard-section')))
 
             # get the name and email from the new tab
             name = driver.find_element(By.CSS_SELECTOR, 'span.fn').text
