@@ -20,6 +20,9 @@ spreadsheet_id = 'spreadsheet id'
 
 [Gmail]
 president_name = 'president name'
+
+[SeleniumDriver]
+path = 'path-to-driver-or-empty-string-for-auto-selection'
 ```
 
 4. Download your credentials as a .json file from the Google API Console and save them to a file called `credentials.json` in the project folder. You must sign into the Google API Console as ieeesb@g.clemson.edu. You should see a project called IEEE Registration Bot. Go to the [credentials page](https://console.cloud.google.com/apis/credentials) and click the download button for the OAuth 2.0 Client IDs.

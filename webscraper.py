@@ -24,7 +24,12 @@ def initialize_driver() -> webdriver.Chrome:
     Returns a webdriver object for the TigerQuest prospective member page.
     AKA Opens a new chrome browser.
     '''
-    service = webdriver.ChromeService(executable_path='/usr/bin/chromedriver')
+    with open('auth.toml', 'rb') as f:
+        auth = tomllib.load(f)
+        path = auth['SeleniumDriver']['path']
+        if path == '':
+            path = None
+    service = webdriver.ChromeService(executable_path=path)
     driver = webdriver.Chrome(service=service)
     return driver
 
