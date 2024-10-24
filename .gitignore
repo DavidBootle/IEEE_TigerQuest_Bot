@@ -164,3 +164,4 @@ auth.toml
 credentials.json
 gmail_token.json
 token.json
+*.log
