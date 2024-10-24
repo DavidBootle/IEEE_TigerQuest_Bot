@@ -19,11 +19,13 @@ import sheets
 import gmail
 from datetime import datetime
 import time
+from log import logger
 
 def perform_update():
     '''
     The main loop of the script. This function is called every 10 minutes.
     '''
+    logger.info("Starting new loop iteration...")
     # fetch the list of prospective members
     tq_members = webscraper.fetch_prospective_members()
 
@@ -31,6 +33,7 @@ def perform_update():
     sheet_members = sheets.get_list_of_known_members()
 
     # make a list of members that are in the tq page but not in the sheet
+    logger.info('Calculating list of members in both sheet and tiger quest')
     tq_emails = [member['email'] for member in tq_members]
     sheet_emails = [member['email'] for member in sheet_members]
     pending_members = []
@@ -40,12 +43,14 @@ def perform_update():
         
     '''NEW MEMBERS'''
     # send those members the interest email, then add them to the sheet
+    logger.info('Sending required new member emails...')
     for member in pending_members:
         gmail.send_interest_email(member)
         sheets.add_prospective_member_to_sheet(member)
     
     '''CHECK FOR MEMBER RESPONSES IN THE EMAIL'''
     # for each member in tigerquest, check to see if they have emailed their membership status
+    logger.info('Checking for member number responses...')
     accepted_members = []
     for member in sheet_members:
         # if the member is on the tq page, see if they have emailed their membership status
@@ -69,10 +74,12 @@ def perform_update():
     # only refresh the sheet if there are pending members or accepted members
     # if there are not pending members or accepted members, the sheet is already up to date
     if (len(pending_members) + len(accepted_members)) != 0:
+        logger.debug('Sheet is not up to date, refreshing...')
         sheet_members = sheets.get_list_of_known_members()
     
     '''SEND REMINDERS'''
     # get a list of members that are in the sheet, but have a status of 'EMAIL SENT' and a status date more than a week ago
+    logger.info('Sending out initial reminder emails...')
     for member in sheet_members:
         # if the member was sent an email more than a week ago, send a reminder email and change their status to 'REMINDER SENT'
         if member['status'] == 'EMAIL SENT' and (datetime.now() - datetime.strptime(member['status_date'], '%m/%d/%y')).days > 7:
@@ -81,12 +88,14 @@ def perform_update():
 
     '''REMOVE MEMBERS WHO HAVE CANCELLED THEIR MEMBERSHIP'''
     # Find members who are not on the tq page, but do not have a status of 'APPROVED'. If they cancelled their own membership, they should be be marked as a cancelled member
+    logger.info('Checking for members that removed their application...')
     cancelled_members = [member for member in sheet_members if member['email'] not in tq_emails and member['status'] != 'APPROVED']
     for member in cancelled_members:
         sheets.update_member_status(member, 'SELF-CANCEL')
     
     '''REJECT MEMBERS WHO HAVE NOT RESPONDED WITHIN THE TIME LIMIT'''
     # get a list of members that are in the sheet and on the tq page, but have a status of 'REMINDER SENT' and a status date more than a week ago
+    logger.info('Rejecting members with expired time limit...')
     members_to_remove_from_tq = []
     for member in sheet_members:
         # if the member was sent a reminder more than a week ago
@@ -103,7 +112,7 @@ def perform_update():
 while True:
     try:
         perform_update()
-        print('Loop done, sleeping for 10 minutes...')
+        logger.info('Finished current loop. Sleeping for 10 minutes.')
     except Exception as e:
-        print(f'Error: {e}')
+        logger.exception('An exception ocurred in the run loop that caused the program to terminate this iteration.')
     time.sleep(10*60) # sleep for 10 minutes

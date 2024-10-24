@@ -7,6 +7,7 @@ membership status updates.
 from simplegmail import Gmail
 from simplegmail.query import construct_query
 import re
+from log import logger
 
 import tomllib
 
@@ -56,7 +57,7 @@ def send_interest_email(member: dict[str, str]):
 
     gmail.send_message(**params)
 
-    print(f'Interest email sent to {member["name"]}')
+    logger.debug(f'Interest email sent to {member["name"]}')
 
 def send_reminder_email(member: dict[str, str]):
     '''
@@ -78,7 +79,7 @@ def send_reminder_email(member: dict[str, str]):
 
     gmail.send_message(**params)
 
-    print(f'Reminder email sent to {member["name"]}')
+    logger.debug(f'Reminder email sent to {member["name"]}')
 
 def send_welcome_email(member: dict[str, str]):
     '''
@@ -100,7 +101,7 @@ def send_welcome_email(member: dict[str, str]):
 
     gmail.send_message(**params)
 
-    print(f'Welcome email sent to {member["name"]}')
+    logger.debug(f'Welcome email sent to {member["name"]}')
 
 def send_rejection_email(member: dict[str, str]):
     '''
@@ -122,7 +123,7 @@ def send_rejection_email(member: dict[str, str]):
 
     gmail.send_message(**params)
 
-    print(f'Rejection email sent to {member["name"]}')
+    logger.debug(f'Rejection email sent to {member["name"]}')
 
 def swap_email_ending(email):
     '''

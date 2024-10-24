@@ -13,6 +13,7 @@ from selenium.webdriver.support import expected_conditions as EC
 import tomllib
 from selenium.common.exceptions import NoSuchElementException
 from time import sleep
+from log import logger
 
 PROSPECTIVE_MEMBER_URL = 'https://clemson.campuslabs.com/engage/actioncenter/organization/ieee_sbinactive/roster/Roster/prospective'
 LOGIN_DOMAIN = 'idpfed.clemson.edu'
@@ -62,13 +63,16 @@ def load_prospective_member_page(driver: webdriver.Chrome):
     '''
     Opens the prospective member page in TigerQuest and logs in if necessary.
     '''
+    logger.debug('Loading propsective members page.')
     driver.get(PROSPECTIVE_MEMBER_URL)
 
     # login if necessary
     clemson_login(driver)
 
     # wait for the member grid to load
+    logger.debug('Waiting for svgGrid (member listings) to appear...')
     WebDriverWait(driver, 60).until(EC.presence_of_all_elements_located((By.CLASS_NAME, 'svgGrid')))
+    logger.debug('Found svgGrid, continuing (waiting one second)')
     sleep(1) # wait one second just to be sure
 
 def fetch_prospective_members() -> list[dict[str, str]]:
@@ -77,8 +81,7 @@ def fetch_prospective_members() -> list[dict[str, str]]:
     The returned object is a list of dictionaries, where each dictionary contains
     the attributes 'name' and 'email'.
     '''
-    
-    print('Fetching prospective members...')
+    logger.info('Fetching prospective members...')
     driver = initialize_driver() # Create a new webdriver
     load_prospective_member_page(driver) # open TigerQuest page
 
@@ -98,6 +101,7 @@ def fetch_prospective_members() -> list[dict[str, str]]:
 
         # for each url, open in a new tab and extract the name and email, then save to member info
         for url in name_element_hrefs:
+            logger.debug(f'Opening window to get information for url {url}')
             # open a new tab with javascript
             driver.execute_script("window.open('');")
 
@@ -118,6 +122,8 @@ def fetch_prospective_members() -> list[dict[str, str]]:
                 'email': email
             })
 
+            logger.debug(f'Found info for member {name}')
+
             # close the current tab
             driver.close()
 
@@ -128,10 +134,12 @@ def fetch_prospective_members() -> list[dict[str, str]]:
         try:
             next_button = driver.find_element(By.XPATH, "//span[@class='paginationRight']//a[text()='next']")
             # if this didn't fail, then the next button is present, click it and call the function again
+            logger.debug('Found next page button, moving to next page...')
             driver.get(next_button.get_attribute('href'))
             get_member_info_for_page()
         except NoSuchElementException:
             # if the next button is not present, then we're done
+            logger.debug("Didn't find next page button. We're done here!")
             return
     
     get_member_info_for_page()
@@ -154,7 +162,7 @@ def accept_member(driver: webdriver.Chrome, member: dict[str, str]):
     Accepts a member by clicking the reject button on the TigerQuest page.
     Does not load the tigerQuest page.
     '''
-    print(f'Accepting member {member["name"]}...')
+    logger.debug(f'Accepting member {member["name"]}...')
     load_prospective_member_page(driver)
 
     def attempt_to_accept():
@@ -170,7 +178,7 @@ def accept_member(driver: webdriver.Chrome, member: dict[str, str]):
                 return
             except NoSuchElementException:
                 # if the next button is not present, then we're done
-                print(f'Failed to find member {member["name"]} on TigerQuest to accept.')
+                logger.debug(f'Failed to find member {member["name"]} on TigerQuest to accept.')
                 return
             
         # if the id is found
@@ -196,7 +204,7 @@ def reject_member(driver: webdriver.Chrome, member: dict[str, str]):
     Rejects a member by clicking the reject button on the TigerQuest page.
     Does not load the tigerQuest page.
     '''
-    print(f'Rejecting member {member["name"]}...')
+    logger.debug(f'Rejecting member {member["name"]}...')
     load_prospective_member_page(driver)
 
     def attempt_to_remove():
@@ -212,7 +220,7 @@ def reject_member(driver: webdriver.Chrome, member: dict[str, str]):
                 return
             except NoSuchElementException:
                 # if the next button is not present, then we're done
-                print(f'Failed to find member {member["name"]} on TigerQuest to remove.')
+                logger.debug(f'Failed to find member {member["name"]} on TigerQuest to remove.')
                 return
             
         # if the id is found

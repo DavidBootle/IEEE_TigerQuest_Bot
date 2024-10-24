@@ -9,6 +9,7 @@ The sheet in question should be the current year's IEEE Membership sheet.
 from datetime import datetime
 import tomllib
 import gspread
+from log import logger
 
 SCOPES = ['https://www.googleapis.com/auth/drive.file']
 
@@ -33,7 +34,7 @@ def get_list_of_known_members() -> list[dict[str, str]]:
 
     Returns a list of dictionaries, where each dictionary contains the attributes 'name', 'email', 'status', and 'status_date'.
     '''
-    print('Getting list of known members...')
+    logger.debug('Getting list of known members...')
 
     # connect to google sheets and get the worksheet
     worksheet = get_worksheet()
@@ -51,6 +52,7 @@ def get_list_of_known_members() -> list[dict[str, str]]:
             'status': status,
             'status_date': status_dates
         })
+    logger.debug(f'Found known members.')
     return member_info
 
 def add_prospective_member_to_sheet(member: dict[str, str]):
@@ -69,7 +71,7 @@ def add_prospective_member_to_sheet(member: dict[str, str]):
     # add the new member to the sheet
     worksheet.append_row([member['name'], member['email'], '', 'EMAIL SENT', current_date], table_range='A1:E1')
 
-    print(f'Added new member {member["name"]} to sheet.')
+    logger.debug(f'Added new member {member["name"]} to sheet.')
 
 def update_member_status(member: dict[str, str], new_status: str):
     '''
@@ -89,7 +91,7 @@ def update_member_status(member: dict[str, str], new_status: str):
     worksheet.update_cell(member_row, 4, new_status)
     worksheet.update_cell(member_row, 5, current_date)
 
-    print(f'Updated member status of {member["name"]} to {new_status} in the sheet.')
+    logger.debug(f'Updated member status of {member["name"]} to {new_status} in the sheet.')
 
 def member_approved(member: dict[str, str], member_id: str):
     '''
@@ -110,7 +112,7 @@ def member_approved(member: dict[str, str], member_id: str):
     worksheet.update_cell(member_row, 4, 'APPROVED')
     worksheet.update_cell(member_row, 5, current_date)
 
-    print(f'Updated member status of {member["name"]} to APPROVED in the sheet with id {member_id}.')
+    logger.debug(f'Updated member status of {member["name"]} to APPROVED in the sheet with id {member_id}.')
 
 def remove_member(member: dict[str, str]):
     '''
@@ -126,7 +128,7 @@ def remove_member(member: dict[str, str]):
     member_row = cell.row
     worksheet.delete_rows(member_row, member_row)
 
-    print(f'Removed member {member["name"]} from sheet.')
+    logger.debug(f'Removed member {member["name"]} from sheet.')
 
 # add_prospective_member_to_sheet({'name': 'David Bootle', 'email': 'dbootle@clemson.edu'})
 # update_member_status({'name': 'David Bootle', 'email': 'dbootle@clemson.edu'}, 'REMINDER SENT')
