@@ -60,6 +60,19 @@ def clemson_login(driver: webdriver.Chrome):
         sleep(2) # sleep for 2 seconds
         driver.find_element(By.ID, 'submitButton').click()
 
+def wait_for_member_list(driver: webdriver.Chrome):
+    '''
+    Waits for the element with svg class (tigerquest roster page list)
+    '''
+    try:
+        logger.debug('Waiting for svgGrid (member listings) to appear...')
+        WebDriverWait(driver, 60).until(EC.presence_of_all_elements_located((By.CLASS_NAME, 'svgGrid')))
+        logger.debug('Found svgGrid, continuing after one second...')
+        sleep(1) # wait one second just to be sure
+    except TimeoutError:
+        logger.error("Failed to find svgGrid (member listings) within 60 seconds.")
+        raise TimeoutError("Failed to find list of members within 60 seconds.")
+
 def load_prospective_member_page(driver: webdriver.Chrome):
     '''
     Opens the prospective member page in TigerQuest and logs in if necessary.
@@ -71,10 +84,7 @@ def load_prospective_member_page(driver: webdriver.Chrome):
     clemson_login(driver)
 
     # wait for the member grid to load
-    logger.debug('Waiting for svgGrid (member listings) to appear...')
-    WebDriverWait(driver, 60).until(EC.presence_of_all_elements_located((By.CLASS_NAME, 'svgGrid')))
-    logger.debug('Found svgGrid, continuing (waiting one second)')
-    sleep(1) # wait one second just to be sure
+    wait_for_member_list(driver)
 
 def fetch_prospective_members() -> list[dict[str, str]]:
     '''
@@ -92,7 +102,7 @@ def fetch_prospective_members() -> list[dict[str, str]]:
 
     def get_member_info_for_page():
         # double check the member grid exists
-        WebDriverWait(driver, 60).until(EC.presence_of_all_elements_located((By.CLASS_NAME, 'svgGrid')))
+        wait_for_member_list(driver)
 
         # find all elements identified by a.member-modal
         name_elements = driver.find_elements(By.XPATH, "//table//a[contains(@class, 'member-modal')]")
@@ -165,6 +175,7 @@ def accept_member(driver: webdriver.Chrome, member: dict[str, str]):
     '''
     logger.debug(f'Accepting member {member["name"]}...')
     load_prospective_member_page(driver)
+    wait_for_member_list(driver)
 
     def attempt_to_accept():
         # find the id for the specific member
@@ -207,6 +218,7 @@ def reject_member(driver: webdriver.Chrome, member: dict[str, str]):
     '''
     logger.debug(f'Rejecting member {member["name"]}...')
     load_prospective_member_page(driver)
+    wait_for_member_list(driver)
 
     def attempt_to_remove():
         # find the id for the specific member
