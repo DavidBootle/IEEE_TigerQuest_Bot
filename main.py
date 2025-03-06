@@ -16,7 +16,7 @@ ieeesb@g.clemson.edu email address.
 
 from datetime import datetime
 import time
-import tomllib
+from sys import exit
 
 # Peform local imports
 from log import logger
@@ -58,7 +58,8 @@ def perform_update():
     accepted_members = []
     for member in sheet_members:
         # if the member is on the tq page, see if they have emailed their membership status
-        if member['email'] in tq_emails:
+        # also check if they have already been accepted
+        if member['email'] in tq_emails and member['status'] != 'ACCEPTED':
             id = gmail.get_membership_id_from_email(member)
             if id is not None:
                 # if they have emailed their membership status, update their status in the sheet and accept them in tigerquest and email them the welcome message
@@ -69,6 +70,12 @@ def perform_update():
                 for tq_member in tq_members:
                     if tq_member['email'] == member['email']:
                         tq_members.remove(tq_member)
+        elif member['status'] == 'ACCEPTED':
+            # this should not happen unless tigerquest has failed to remove users. if it does, the program will stop to avoid any further issues.
+            gmail.send_critical_email(f'Accepted member {member['name']} has not been accepted on the TigerQuest page despite being already marked as accepted in Google Sheets. This should never happen unless there is a problem. The program is stopping to avoid any further issues.')
+            logger.critical(f'Accepted member {member["name"]} has not been accepted on the TigerQuest page despite being already marked as accepted in Google Sheets. This should never happen unless there is a problem. The program is stopping to avoid any further issues.')
+            exit(1)
+            
     if len(accepted_members) > 0:
         webscraper.accept_members(accepted_members)
 

@@ -171,5 +171,28 @@ def get_membership_id_from_email(member: dict[str, str]) -> str:
             return find_membership_number(message.plain)
     return None
 
+def send_critical_email(message):
+    '''
+    Sends a critical email to ieeesb@g.clemson.edu informing the executive team that something has gone wrong.
+    The message parameter will be included in the body of the email.
+    '''
+
+    email_html = get_email('critical')
+    email_html = email_html.replace('%%MESSAGE%%', message)
+
+    gmail = get_gmail()
+    params = {
+        'to': 'ieeesb@g.clemson.edu',
+        'sender': 'ieeesb@g.clemson.edu',
+        'subject': 'CRITICAL ERROR in IEEE Registration Bot',
+        'msg_html': email_html,
+        'signature': True
+    }
+
+    if settings.get('Debug') != True:
+        gmail.send_message(**params)
+
+    logger.debug(f'Sending critical error message to ieeesb@g.clemson.edu with message: {message}')
+
 # print(get_membership_id_from_email({'name': 'Ignacio Carmichael', 'email': 'ignacic@clemson.edu'}))
 # send_rejection_email({'name': 'David Bootle', 'email': 'dbootle@clemson.edu'})
