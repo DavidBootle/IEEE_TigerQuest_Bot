@@ -198,7 +198,7 @@ def accept_member(driver: webdriver.Chrome, member: dict[str, str]):
         else:
             # run javascript to accept the user
             if settings.get('Debug') != True:
-                driver.execute_script(f"ApproveMember('https://clemson.campuslabs.com/engage/actioncenter/organization/ieee_sbinactive/roster/roster/approvemember/{id}');")
+                driver.execute_script(f"ApproveMember('{settings['TigerQuest']['accept_member_url']}{id}');")
     
     attempt_to_accept()
 
@@ -242,7 +242,7 @@ def reject_member(driver: webdriver.Chrome, member: dict[str, str]):
         else:
             # run javascript to reject the user
             if settings.get('Debug') != True:
-                driver.execute_script(f"DenyMember('https://clemson.campuslabs.com/engage/actioncenter/organization/ieee_sbinactive/roster/roster/denymember/{id}');")
+                driver.execute_script(f"DenyMember('{settings['TigerQuest']['reject_member_url']}{id}');")
     
     attempt_to_remove()
 
