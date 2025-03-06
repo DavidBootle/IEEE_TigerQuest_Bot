@@ -43,15 +43,14 @@ def get_list_of_known_members() -> list[dict[str, str]]:
     
     # create a list of dictionaries, where each dictionary contains the attributes 'name', 'email', 'status', and 'status_date'
     member_info = []
-    if settings.get('Debug') != True:
-        for names, emails, status, status_dates in zip(names_list, emails_list, status_list, status_dates_list):
-            member_info.append({
-                'name': names,
-                'email': emails,
-                'status': status,
-                'status_date': status_dates
-            })
-        logger.debug(f'Found known members.')
+    for names, emails, status, status_dates in zip(names_list, emails_list, status_list, status_dates_list):
+        member_info.append({
+            'name': names,
+            'email': emails,
+            'status': status,
+            'status_date': status_dates
+        })
+    logger.debug(f'Found known members:', member_info)
     return member_info
 
 def add_prospective_member_to_sheet(member: dict[str, str]):

@@ -11,13 +11,13 @@ my_handler.setFormatter(log_formatter)
 my_handler.setLevel(logging.DEBUG)
 
 console_handler = logging.StreamHandler(stdout)
-console_handler.setLevel(logging.INFO)
+if settings.get('Debug') == True:
+    console_handler.setLevel(logging.DEBUG)
+else:
+    console_handler.setLevel(logging.INFO)
 console_handler.setFormatter(log_formatter)
 
 logger = logging.getLogger('RegistrationBot')
-if settings.get('Debug') != True:
-    logger.setLevel(logging.INFO)
-else:
-    logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.DEBUG)
 logger.addHandler(my_handler)
 logger.addHandler(console_handler)

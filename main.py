@@ -113,6 +113,9 @@ def perform_update():
     if len(members_to_remove_from_tq) > 0:
         webscraper.reject_members(members_to_remove_from_tq)
 
+if settings.get('Debug') == True:
+    logger.warning('Debug mode is enabled. No permanent actions will be taken.')
+
 while True:
     try:
         perform_update()
