@@ -198,7 +198,7 @@ def accept_member(driver: webdriver.Chrome, member: dict[str, str]):
         else:
             # run javascript to accept the user
             if settings.get('Debug') != True:
-                driver.execute_script(f"ApproveMember('{settings['TigerQuest']['accept_member_url']}{id}');")
+                driver.execute_script(f"ApproveMember('{settings['TigerQuest']['approve_member_url']}{id}');")
     
     attempt_to_accept()
 
