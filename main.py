@@ -14,12 +14,16 @@ Authorization scope for the project's APIs can be found on google cloud under th
 ieeesb@g.clemson.edu email address.
 '''
 
+from datetime import datetime
+import time
+import tomllib
+
+# Peform local imports
+from log import logger
 import webscraper
 import sheets
 import gmail
-from datetime import datetime
-import time
-from log import logger
+from settings import settings
 
 def perform_update():
     '''

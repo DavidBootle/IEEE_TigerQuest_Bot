@@ -8,8 +8,7 @@ from simplegmail import Gmail
 from simplegmail.query import construct_query
 import re
 from log import logger
-
-import tomllib
+from settings import settings
 
 def get_gmail() -> Gmail:
     '''
@@ -24,10 +23,8 @@ def format_email(email_str: str, member: dict[str, str]) -> str:
     '''
     email_str = email_str.replace("%FIRST_NAME%", member['name'].split(' ')[0])
     
-    # get president's name from auth.toml
-    with open('auth.toml', 'rb') as f:
-        auth = tomllib.load(f)
-        president_name = auth['Gmail']['president_name']
+    # get president's name from settings and replace in email
+    president_name = settings['Gmail']['president_name']
     email_str = email_str.replace("%PRESIDENT_NAME%", president_name)
     return email_str
 
@@ -55,7 +52,8 @@ def send_interest_email(member: dict[str, str]):
         'signature': True,
     }
 
-    gmail.send_message(**params)
+    if settings.get('Debug') != True:
+        gmail.send_message(**params)
 
     logger.debug(f'Interest email sent to {member["name"]}')
 
@@ -76,8 +74,8 @@ def send_reminder_email(member: dict[str, str]):
         'msg_html': email_html,
         'signature': True,
     }
-
-    gmail.send_message(**params)
+    if settings.get('Debug') != True:
+        gmail.send_message(**params)
 
     logger.debug(f'Reminder email sent to {member["name"]}')
 
@@ -99,7 +97,8 @@ def send_welcome_email(member: dict[str, str]):
         'signature': True,
     }
 
-    gmail.send_message(**params)
+    if settings.get('Debug') != True:
+        gmail.send_message(**params)
 
     logger.debug(f'Welcome email sent to {member["name"]}')
 
@@ -121,7 +120,8 @@ def send_rejection_email(member: dict[str, str]):
         'signature': True,
     }
 
-    gmail.send_message(**params)
+    if settings.get('Debug') != True:
+        gmail.send_message(**params)
 
     logger.debug(f'Rejection email sent to {member["name"]}')
 

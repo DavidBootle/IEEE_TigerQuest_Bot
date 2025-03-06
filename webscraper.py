@@ -10,13 +10,13 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-import tomllib
 from selenium.common.exceptions import NoSuchElementException
+from settings import settings
 from time import sleep
 from log import logger
 
-PROSPECTIVE_MEMBER_URL = 'https://clemson.campuslabs.com/engage/actioncenter/organization/ieee_sb/roster/Roster/prospective'
-LOGIN_DOMAIN = 'idpfed.clemson.edu'
+PROSPECTIVE_MEMBER_URL = settings['TigerQuest']['prospective_member_url']
+LOGIN_DOMAIN = settings['ClemsonAuth']['login_domain']
 
 '''UTILITY FUNCTIONS'''
 def initialize_driver() -> webdriver.Chrome:
@@ -24,11 +24,9 @@ def initialize_driver() -> webdriver.Chrome:
     Returns a webdriver object for the TigerQuest prospective member page.
     AKA Opens a new chrome browser.
     '''
-    with open('auth.toml', 'rb') as f:
-        auth = tomllib.load(f)
-        path = auth['SeleniumDriver']['path']
-        if path == '':
-            path = None
+    path = settings['SeleniumDriver']['path']
+    if path == '':
+        path = None
     service = webdriver.ChromeService(executable_path=path)
     driver = webdriver.Chrome(service=service)
     return driver
@@ -55,10 +53,8 @@ def clemson_login(driver: webdriver.Chrome):
     # check if the page is redirected to the login page
     if LOGIN_DOMAIN in driver.current_url:
         # if it is, log in using the credentials in the auth.toml file
-        with open('auth.toml', 'rb') as f:
-            auth = tomllib.load(f)
-            username = auth['ClemsonAuth']['username']
-            password = auth['ClemsonAuth']['password']
+        username = settings['ClemsonAuth']['username']
+        password = settings['ClemsonAuth']['password']
         # type the username and password into the login form
         driver.find_element(By.ID, 'username').send_keys(username)
         driver.find_element(By.ID, 'password').send_keys(password)
@@ -201,7 +197,8 @@ def accept_member(driver: webdriver.Chrome, member: dict[str, str]):
         # if the id is found
         else:
             # run javascript to accept the user
-            driver.execute_script(f"ApproveMember('https://clemson.campuslabs.com/engage/actioncenter/organization/ieee_sbinactive/roster/roster/approvemember/{id}');")
+            if settings.get('Debug') != True:
+                driver.execute_script(f"ApproveMember('https://clemson.campuslabs.com/engage/actioncenter/organization/ieee_sbinactive/roster/roster/approvemember/{id}');")
     
     attempt_to_accept()
 
@@ -244,7 +241,8 @@ def reject_member(driver: webdriver.Chrome, member: dict[str, str]):
         # if the id is found
         else:
             # run javascript to reject the user
-            driver.execute_script(f"DenyMember('https://clemson.campuslabs.com/engage/actioncenter/organization/ieee_sbinactive/roster/roster/denymember/{id}');")
+            if settings.get('Debug') != True:
+                driver.execute_script(f"DenyMember('https://clemson.campuslabs.com/engage/actioncenter/organization/ieee_sbinactive/roster/roster/denymember/{id}');")
     
     attempt_to_remove()
 
