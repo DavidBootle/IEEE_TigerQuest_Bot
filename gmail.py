@@ -223,7 +223,7 @@ def send_critical_email(message):
     params = {
         'to': 'ieeesb@g.clemson.edu',
         'sender': 'ieeesb@g.clemson.edu',
-        'subject': 'CRITICAL ERROR in IEEE Registration Bot',
+        'subject': 'CRITICAL WARNING in IEEE Registration Bot',
         'msg_html': email_html,
         'signature': True
     }
