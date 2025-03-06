@@ -15,7 +15,7 @@ from selenium.common.exceptions import NoSuchElementException
 from time import sleep
 from log import logger
 
-PROSPECTIVE_MEMBER_URL = 'https://clemson.campuslabs.com/engage/actioncenter/organization/ieee_sbinactive/roster/Roster/prospective'
+PROSPECTIVE_MEMBER_URL = 'https://clemson.campuslabs.com/engage/actioncenter/organization/ieee_sb/roster/Roster/prospective'
 LOGIN_DOMAIN = 'idpfed.clemson.edu'
 
 '''UTILITY FUNCTIONS'''
