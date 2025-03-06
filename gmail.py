@@ -5,6 +5,7 @@ membership status updates.
 '''
 
 from simplegmail import Gmail
+from simplegmail.message import Message
 from simplegmail.query import construct_query
 import re
 from log import logger
@@ -33,6 +34,39 @@ def get_email(email_name: str) -> str:
         email_str = f.read()
         return email_str
 
+def get_last_email(member: dict[str, str]) -> Message|None:
+    '''
+    Returns the last email sent to a member.
+    '''
+    gmail = get_gmail()
+    query = construct_query({
+        'sender': ['ieeesb@g.clemson.edu'],
+        'recipient': [member['email'], swap_email_ending(member['email'])],
+        'newer_than': (1, "month"), # prevent weird issues from happening over breaks or something
+    })
+    emails = gmail.get_messages(query=query)
+    if emails and len(emails) > 0:
+        return emails[0]
+    else:
+        return None
+
+def verify_not_duplicate(member: dict[str, str], params: dict[str, str]):
+    '''
+    Checks the subject line of the current email being sent and the last email sent to the member.
+    If they match, returns False to indiciate that the email should not be sent.
+    If they do not match, returns True to indicate that the email can be sent.
+    '''
+    # get the last email sent to the member
+    last_email = get_last_email(member)
+    if last_email is not None:
+        # if the last email sent to the member does has the same subject line as the current email, return False
+        if last_email.subject == params['subject']:
+            logger.debug(f"Prevented duplicate email with subject line '{params['subject']}' from being sent to {member['name']} at '{member['email']}'.")
+            send_critical_email(f"Prevented duplicate email with subject line '{params['subject']}' from being sent to {member['name']} at '{member['email']}'.")
+            return False
+    # if no emails have been sent in the last month, or the if statement above did not return False, return True
+    return True
+
 def send_interest_email(member: dict[str, str]):
     '''
     Sends an email to a new member.
@@ -52,10 +86,11 @@ def send_interest_email(member: dict[str, str]):
         'signature': True,
     }
 
-    if settings.get('Debug') != True:
-        gmail.send_message(**params)
+    if verify_not_duplicate(member, params):
+        if settings.get('Debug') != True:
+            gmail.send_message(**params)
 
-    logger.debug(f'Interest email sent to {member["name"]}')
+        logger.debug(f'Interest email sent to {member["name"]}')
 
 def send_reminder_email(member: dict[str, str]):
     '''
@@ -74,10 +109,12 @@ def send_reminder_email(member: dict[str, str]):
         'msg_html': email_html,
         'signature': True,
     }
-    if settings.get('Debug') != True:
-        gmail.send_message(**params)
 
-    logger.debug(f'Reminder email sent to {member["name"]}')
+    if verify_not_duplicate(member, params):
+        if settings.get('Debug') != True:
+            gmail.send_message(**params)
+
+        logger.debug(f'Reminder email sent to {member["name"]}')
 
 def send_welcome_email(member: dict[str, str]):
     '''
@@ -97,10 +134,11 @@ def send_welcome_email(member: dict[str, str]):
         'signature': True,
     }
 
-    if settings.get('Debug') != True:
-        gmail.send_message(**params)
+    if verify_not_duplicate(member, params):
+        if settings.get('Debug') != True:
+            gmail.send_message(**params)
 
-    logger.debug(f'Welcome email sent to {member["name"]}')
+        logger.debug(f'Welcome email sent to {member["name"]}')
 
 def send_rejection_email(member: dict[str, str]):
     '''
@@ -120,10 +158,11 @@ def send_rejection_email(member: dict[str, str]):
         'signature': True,
     }
 
-    if settings.get('Debug') != True:
-        gmail.send_message(**params)
+    if verify_not_duplicate(member, params):
+        if settings.get('Debug') != True:
+            gmail.send_message(**params)
 
-    logger.debug(f'Rejection email sent to {member["name"]}')
+        logger.debug(f'Rejection email sent to {member["name"]}')
 
 def swap_email_ending(email):
     '''
