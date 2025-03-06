@@ -50,7 +50,7 @@ def get_list_of_known_members() -> list[dict[str, str]]:
             'status': status,
             'status_date': status_dates
         })
-    logger.debug(f'Found known members:', member_info)
+    logger.debug(f'Found known members: {str(member_info)}')
     return member_info
 
 def add_prospective_member_to_sheet(member: dict[str, str]):
