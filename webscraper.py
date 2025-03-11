@@ -14,6 +14,8 @@ from selenium.common.exceptions import NoSuchElementException
 from settings import settings
 from time import sleep
 from log import logger
+from gmail import send_critical_email
+from sys import exit
 
 PROSPECTIVE_MEMBER_URL = settings['TigerQuest']['prospective_member_url']
 LOGIN_DOMAIN = settings['ClemsonAuth']['login_domain']
@@ -199,6 +201,15 @@ def accept_member(driver: webdriver.Chrome, member: dict[str, str]):
             # run javascript to accept the user
             if settings.get('Debug') != True:
                 driver.execute_script(f"ApproveMember('{settings['TigerQuest']['approve_member_url']}{id}');")
+            
+                # wait for the user's profile to disappear
+                try:
+                    wait = WebDriverWait(driver, 30) # wait for up to 30 seconds
+                    wait.until(EC.invisibility_of_element_located((By.CSS_SELECTOR, f"input[title='{member['name']}']")))
+                except TimeoutError:
+                    logger.critical(f'Failed to add member {member["name"]} to TigerQuest. Sending critical error email.')
+                    send_critical_email(f'Failed to add member {member["name"]} to TigerQuest. This could indicate a network issue or that there is an issue with the accept_member_url in the settings file. The program will now stop to avoid any further issues.')
+                    exit(1)
     
     attempt_to_accept()
 
@@ -243,6 +254,15 @@ def reject_member(driver: webdriver.Chrome, member: dict[str, str]):
             # run javascript to reject the user
             if settings.get('Debug') != True:
                 driver.execute_script(f"DenyMember('{settings['TigerQuest']['reject_member_url']}{id}');")
+
+                # wait for the user's profile to disappear
+                try:
+                    wait = WebDriverWait(driver, 30) # wait for up to 30 seconds
+                    wait.until(EC.invisibility_of_element_located((By.CSS_SELECTOR, f"input[title='{member['name']}']")))
+                except TimeoutError:
+                    logger.critical(f'Failed to remove member {member["name"]} from TigerQuest. Sending critical error email.')
+                    send_critical_email(f'Failed to remove member {member["name"]} from TigerQuest. This could indicate a network issue or that there is an issue with the reject_member_url in the settings file. The program will now stop to avoid any further issues.')
+                    exit(1)
     
     attempt_to_remove()
 
