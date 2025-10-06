@@ -180,6 +180,11 @@ def find_membership_number(email: str) -> str:
     '''
     Attempts to find a membership number in the email. Returns the membership number if found, otherwise returns None.
     '''
+
+    if email == None:
+        logger.warning("Processed email that is None!")
+        return None
+
     # Regex pattern to match 9 or 10 digit numbers surrounded by spaces or punctuation
     pattern = r'(?<!\d)[\s.,!?;:"\'(){}\[\]\-\*\r\n]*(\d{9,10})(?=([\s.,!?;:"\'(){}\[\]\-\\r\\n\*]))'
     
