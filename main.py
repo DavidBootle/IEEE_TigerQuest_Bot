@@ -14,6 +14,7 @@ Authorization scope for the project's APIs can be found on google cloud under th
 ieeesb@g.clemson.edu email address.
 '''
 
+from tqdm import tqdm
 from datetime import datetime
 import time
 from sys import exit
@@ -137,5 +138,7 @@ while True:
     
     # default sleep time to 10 mins if not specified
     logger.info(f'Finished current loop. Sleeping for {sleep_time} minutes.')
-    time.sleep(sleep_time*60) # sleep for x minutes
+
+    for i in tqdm(range(sleep_time*60), desc="Waiting"):
+        time.sleep(1)
     

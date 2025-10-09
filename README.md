@@ -6,7 +6,7 @@ Automatically checks for new members on the IEEE TigerQuest and adds them
 
 2. Run the following commands to install required libraries:
 ```bash
-pip install selenium gspread simplegmail
+pip install selenium gspread simplegmail tdqm
 ```
 
 3. Create an `auth.toml` file in the project folder with the following info:
