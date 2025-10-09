@@ -11,19 +11,25 @@ pip install selenium gspread simplegmail
 
 3. Create an `auth.toml` file in the project folder with the following info:
 ```toml
+Debug = false # if true, will not make permanent changes
+
+[System]
+sleep_minutes = 5 # Number of minutes to sleep between checks (recommended 5-10)
+
 [ClemsonAuth]
 login_domain = 'idpfed.clemson.edu'
 username = "your username"
 password = "your password"
 
 [GoogleSheets]
-spreadsheet_id = 'spreadsheet id'
+spreadsheet_id = 'spreadsheet id' # id of the spreadsheet to keep track of members on
 
 [Gmail]
 president_name = 'president name'
 
 [SeleniumDriver]
-path = 'path-to-driver-or-empty-string-for-auto-selection'
+path = '' # path to the chromedriver executable or empty string for auto selection
+# if you get weird issues related to the chromedriver, manually set this value
 
 [TigerQuest]
 prospective_member_url = 'https://clemson.campuslabs.com/engage/actioncenter/organization/ieee_sb/roster/Roster/prospective'
@@ -36,7 +42,7 @@ reject_member_url = 'https://clemson.campuslabs.com/engage/actioncenter/organiza
 5. When you run the script for the first time, it will ask you to authorize it using your Google account. Always authorize it with the ieeesb@g.clemson.edu account. DO NOT use your personal account, as that will break it. If authentication is failing, delete the `token.json` file in the current directory and try again.
 
 ## Debug Mode
-When testing the program, you can add the following line to the **top** of the `auth.toml` file to enable debug mode:
+When testing the program, you can edit the following line at the **top** of the `auth.toml` file to enable debug mode:
 
 ```toml
 Debug = true
@@ -44,4 +50,4 @@ Debug = true
 
 This will **prevent the program from taking any permanent actions**, such as updating the google sheet, sending emails, or accepting or rejecting members. In addition, the output log will contain more detailed information, similar to the `registration.log` file. Note that the console output will still log things like "email sent" and "accepted member", but the actual action will not be performed.
 
-Debug mode is intended to be used when testing and debugging logic in the program. Please make sure to test without debug mode to catch any bugs related to the webdriver, google sheets, or gmail APIs.
+Debug mode is intended to be used when testing and debugging logic in the program. Please make sure to test without debug mode when trying to catch any bugs related to the webdriver, google sheets, or gmail APIs, as these services may not be used fully in debug mode.

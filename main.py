@@ -126,7 +126,16 @@ if settings.get('Debug') == True:
 while True:
     try:
         perform_update()
-        logger.info('Finished current loop. Sleeping for 10 minutes.')
     except Exception as e:
         logger.exception('An exception ocurred in the run loop that caused the program to terminate this iteration.')
-    time.sleep(10*60) # sleep for 10 minutes
+
+    if not settings.get('System') or not settings.get('System').get('sleep_minutes'):
+        logger.warning('WARNING: Sleep time not specified! Defaulting to 10 mins. Please see README for auth.toml.')
+        sleep_time = 10
+    else:
+        sleep_time = settings['System']['sleep_minutes']
+    
+    # default sleep time to 10 mins if not specified
+    logger.info(f'Finished current loop. Sleeping for {sleep_time} minutes.')
+    time.sleep(sleep_time*60) # sleep for x minutes
+    
