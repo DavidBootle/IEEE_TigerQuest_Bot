@@ -23,13 +23,16 @@ def format_email(email_str: str, member: dict[str, str]) -> str:
     Takes the HTML for the email and replaces the placeholder text with the member's name and president's name.
     '''
     email_str = email_str.replace("%FIRST_NAME%", member['name'].split(' ')[0])
-    
+
     # get president's name from settings and replace in email
     president_name = settings['Gmail']['president_name']
     email_str = email_str.replace("%PRESIDENT_NAME%", president_name)
     return email_str
 
 def get_email(email_name: str) -> str:
+    '''
+    Given a string email name, fetches the html file content of emails/name.html
+    '''
     with open(f'emails/{email_name}.html', 'r') as f:
         email_str = f.read()
         return email_str
